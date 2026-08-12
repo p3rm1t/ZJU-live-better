@@ -430,9 +430,18 @@ async function main(argv = process.argv.slice(2)) {
     return command ? 0 : 1;
   }
   const config = buildConfig();
-  if (command === "check") return runCheck(config);
-  if (command === "monitor") return runMonitor(config);
-  if (command === "test-ding") return testDingTalk();
+  if (command === "check") {
+    await runCheck(config);
+    return 0;
+  }
+  if (command === "monitor") {
+    await runMonitor(config);
+    return 0;
+  }
+  if (command === "test-ding") {
+    await testDingTalk();
+    return 0;
+  }
   throw new Error(`未知命令：${command}`);
 }
 
