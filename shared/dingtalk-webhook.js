@@ -1,6 +1,5 @@
 import "dotenv/config";
 
-import axios from "axios";
 import crypto from "crypto";
 
 const DINGTALK_SECRET = process.env.DINGTALK_SECRET || "";
@@ -72,20 +71,17 @@ async function dingTalkMarkdown(msg, title = "ZJU Live Better") {
     url = `${url}${separator}timestamp=${timestamp}&sign=${signEncoded}`;
   }
 
-  const response = await axios.post(
-    url,
-    {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
       msgtype: "markdown",
       markdown: { title, text: msg },
-    },
-    {
-      timeout: 20000,
-      validateStatus: () => true,
-      headers: { "Content-Type": "application/json" },
-    },
-  );
-  const responseData = response.data || {};
-  if (response.status < 200 || response.status >= 300) {
+    }),
+    signal: AbortSignal.timeout(20000),
+  });
+  const responseData = await response.json().catch(() => ({}));
+  if (!response.ok) {
     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
   }
   if (responseData.errcode) {
